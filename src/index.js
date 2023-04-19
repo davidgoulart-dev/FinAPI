@@ -98,4 +98,15 @@ app.get("/account", verifyIfExistsAccountCPF, (request, response) => {
     const { customer } = request; // Pega o cliente da requisição
     return response.json(customer); // Retorna os dados do cliente
 } ); // Retorna os dados de um cliente
+app.delete("/account", verifyIfExistsAccountCPF, (request, response) => {
+    const { customer } = request; // Pega o cliente da requisição
+    customers.splice(customer, 1); // Deleta o cliente do array de clientes
+    return response.status(200).json(customers); // Retorna o array de clientes
+} ); // Deleta uma conta
+app.get("/balance", verifyIfExistsAccountCPF, (request, response) => {
+    const { customer } = request; // Pega o cliente da requisição
+    const balance = getBalance(customer.statement); // Pega o saldo do cliente
+    return response.json(balance); // Retorna o saldo do cliente
+}); // Retorna o saldo de um cliente
+
 app.listen(3333, () => {}); // Inicia o servidor
