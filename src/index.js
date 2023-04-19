@@ -15,6 +15,16 @@ function verifyIfExistsAccountCPF(request, response, next) {
     return next(); // Continua a execução do código
 
 }
+function getBalance(statement) {
+    const balance = statement.reduce((acc, operation)=> {
+        if (operation.type === "credit"){
+            return acc + operation.amount;
+        }else {
+            return acc - operation.amount;
+        }
+    } , 0);
+    return balance;
+}
 app.use( express.json() );
 app.post('/account', (request, response) => { // Cria uma conta
     const { cpf, name } = request.body;
@@ -54,4 +64,18 @@ app.post("/deposit", verifyIfExistsAccountCPF, (request, response) => {
     customer.statement.push(statementOperation); // Adiciona a operação no extrato do cliente
     return response.status(201).send("Deposit successfully!");
 });
+app.post("/withdraw", verifyIfExistsAccountCPF, (request, response) => {
+    const { amount } = request.body; // Pega o valor da requisição
+    const { customer } = request; // Pega o cliente da requisição
+    const balance = getBalance(customer.statement); // Pega o saldo do cliente
+    if (balance < amount) { return response.status(400).json({ error: "Insufficient funds!" }); } // Verifica se o cliente tem saldo suficiente
+    const statementOperation = {
+        amount,
+        created_at: new Date(),
+        type: "debit"
+
+    }
+    customer.statement.push(statementOperation); // Adiciona a operação no extrato do cliente
+    return response.status(201).send("Withdraw successfully!");
+} );
 app.listen(3333, () => {}); // Inicia o servidor
