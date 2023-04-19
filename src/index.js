@@ -4,7 +4,7 @@ const { v4: uuidv4 } = require('uuid');
 const customers = []; // Array de clientes
 //Middlewares
 function verifyIfExistsAccountCPF(request, response, next) {
-     const { cpf } = request.headers; // Pega o cpf da url
+     const { cpf } = request.headers; // Pega o cpf do cabeçalho da requisição
    
     const customer = customers.find( (customer) => customer.cpf === cpf ); // Procura o cliente no array de clientes
    
@@ -42,4 +42,16 @@ app.get( "/statement", verifyIfExistsAccountCPF, (request, response) => { // Ret
     return response.json(customer.statement); // Retorna o extrato do cliente
 
 } );
+app.post("/deposit", verifyIfExistsAccountCPF, (request, response) => {
+    const { description, amount } = request.body; // Pega a descrição e o valor da requisição
+    const { customer } = request; // Pega o cliente da requisição
+    const statementOperation = {
+        description,
+        amount,
+        created_at: new Date(),
+        type: "credit"
+    }
+    customer.statement.push(statementOperation); // Adiciona a operação no extrato do cliente
+    return response.status(201).send("Deposit successfully!");
+});
 app.listen(3333, () => {}); // Inicia o servidor
