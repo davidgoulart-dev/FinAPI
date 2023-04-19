@@ -78,4 +78,24 @@ app.post("/withdraw", verifyIfExistsAccountCPF, (request, response) => {
     customer.statement.push(statementOperation); // Adiciona a operação no extrato do cliente
     return response.status(201).send("Withdraw successfully!");
 } );
+app.get( "/statement/date", verifyIfExistsAccountCPF, (request, response) => { // Retorna o extrato de um cliente
+    const { customer } = request; // Pega o cliente da requisição
+   
+    const { date } = request.query; // Pega a data da requisição
+
+    const dateFormat = new Date(date + " 00:00"); // Formata a data
+
+    const statement = customer.statement.filter( (statement) => statement.created_at.toDateString() === new Date(dateFormat).toDateString() ); // Filtra o extrato do cliente pela data
+    return response.json(statement); // Retorna o extrato do cliente
+} );
+app.put("/account", verifyIfExistsAccountCPF, (request, response) => {
+    const { name } = request.body; // Pega o nome da requisição
+    const { customer } = request; // Pega o cliente da requisição
+    customer.name = name; // Atualiza o nome do cliente
+    return response.status(201).send("Account updated successfully!");
+}); // Atualiza os dados de um cliente
+app.get("/account", verifyIfExistsAccountCPF, (request, response) => {
+    const { customer } = request; // Pega o cliente da requisição
+    return response.json(customer); // Retorna os dados do cliente
+} ); // Retorna os dados de um cliente
 app.listen(3333, () => {}); // Inicia o servidor
